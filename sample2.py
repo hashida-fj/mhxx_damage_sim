@@ -18,21 +18,14 @@ urls = [
     u"souken",
     u"hanma",
     u"ransu",
-
-    u"fue",  # 旋律がある
-
-    u"gansu",  # 砲撃がある
-
-    u"chaaku",  # ビンがある
-    u"suraaku",
-
+    u"fue",      # 旋律がある
+    u"gansu",    # 砲撃がある
+    u"chaaku",   # ビンがある
+    u"suraaku",  # ビンがある
     u"musikon",  # 虫の種類がある
-
-    #u"raito.html",
-    #u"hebi.html",
-    #
-    #u"yumi.html",
-
+    u"yumi",     # 溜めレベル、ビンがある
+    u"raito",    # 玉、速射がある
+    u"hebi",     # 玉、しゃがみがある
 ]
 
 
@@ -70,7 +63,7 @@ for url in urls:
     soup = BeautifulSoup(html, "html.parser")
 
     items = []
-    for x in soup.select("table tbody tr"):
+    for x in soup.select("table tbody > tr"):
         tds = x.find_all("td")
 
         item = {}
@@ -86,9 +79,14 @@ for url in urls:
         item["level"] = parser.match(tds[0].img["src"]).group(1)
 
         # critical, defence, elemental
-        item["seinou"] = "".join([x.strip() for x in tds[3].findAll(text=True)])
+        if item["wepontype"] in ["raito", "hebi"]:
+            item["seinou"] = "".join([x.strip() for x in tds[2].findAll(text=True)])
+        else:
+            item["seinou"] = "".join([x.strip() for x in tds[3].findAll(text=True)])
+
         pat = re.compile(r"""
         (
+        攻撃：(?P<buturi>\d*)|
         会心(?P<crit_p>\d*)% |
         会心-(?P<crit_m>\d*)% |
         防御\+(?P<def>\d*) |
