@@ -8,24 +8,25 @@ from parse import *
 
 import os.path
 import time
+import re
 
 
 urls = [
-    u"taiken.html",
-    u"tati.html",
-    u"katate.html",
-    u"souken.html",
-    u"hanma.html",
-    u"ransu.html",
+    u"taiken",
+    u"tati",
+    u"katate",
+    u"souken",
+    u"hanma",
+    u"ransu",
 
-    u"fue.html",
+    u"fue",  # 旋律がある
 
-    u"gansu.html",
+    u"gansu",  # 砲撃がある
 
-    u"chaaku.html",
-    u"suraaku.html",
+    u"chaaku",  # ビンがある
+    u"suraaku",
 
-    u"musikon.html",
+    u"musikon",  # 虫の種類がある
 
     #u"raito.html",
     #u"hebi.html",
@@ -34,11 +35,25 @@ urls = [
 
 ]
 
-import re
 
-
-def parseSeinou(str):
-    seinou = {}
+keyorder = [
+    "level",
+    "wepontype",
+    "name",
+    "buturi",
+    "crit_p",
+    "crit_m",
+    "def",
+    "fire",
+    "water",
+    "elec",
+    "ice",
+    "dragon",
+    "para",
+    "drowsy",
+    "poison",
+    "exp",
+]
 
 for url in urls:
     download_urls = []
@@ -47,7 +62,7 @@ for url in urls:
     # tmpfn = parse_qs(urlparse(url).query)['view'][0]
 
     # (local_filename, headers) = urlretrieve(url, tmpfn)
-    local_filename = url
+    local_filename = url+".html"
 
     with open(local_filename) as fn:
         html = fn.read()
@@ -61,6 +76,7 @@ for url in urls:
         item = {}
 
         # name and pyhsical power
+        item["wepontype"] = url
         item["name"] = tds[0].span.a.string
         item["buturi"] = tds[2].string
 
@@ -99,6 +115,7 @@ for url in urls:
         # kireaji
 
         # print(u" {} {} {} {} {}".format(url, item["name"], item["buturi"], item["level"], item["crit_p"]))
-        print(item)
+        for k in keyorder:
+            print("{} ".format(item[k]), end='')
+        print("")
         items.append(item)
-
