@@ -1,13 +1,5 @@
 # import requests
 from bs4 import BeautifulSoup
-from urllib.request import urlretrieve
-from urllib.parse import urlparse, urlsplit, parse_qs, urljoin
-from tqdm import tqdm
-
-from parse import *
-
-import os.path
-import time
 import re
 
 
@@ -27,7 +19,6 @@ urls = [
     u"raito",    # 玉、速射がある
     u"hebi",     # 玉、しゃがみがある
 ]
-
 
 keyorder = [
     "level",
@@ -54,6 +45,7 @@ keyorder = [
 ]
 
 kireaji_colors = ["赤", "橙", "黄", "緑", "青", "白", "紫"]
+
 fue_colors = {
     "#00cc00": "緑",
     "#00eeee": "空",
@@ -65,12 +57,6 @@ fue_colors = {
     "blue"   : "青"}
 
 for url in urls:
-    download_urls = []
-
-    # baseurl = urljoin(url, ")}/")
-    # tmpfn = parse_qs(urlparse(url).query)['view'][0]
-
-    # (local_filename, headers) = urlretrieve(url, tmpfn)
     local_filename = url+".html"
 
     with open(local_filename) as fn:
