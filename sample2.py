@@ -118,17 +118,17 @@ for url in urls:
             kireaji = tds[5].div
             item["slot"] = str(3 - tds[6].string.count("-"))
 
-        aa = [len(s.string or "") for s in kireaji.find_all("span")]
-        if aa[7] == 0:
+        kireaji_values = [len(s.string or "") for s in kireaji.find_all("span")]
+        if kireaji_values[7] == 0:
             item["takumi_fuyou"] = "1"
         else:
             item["takumi_fuyou"] = "0"
 
-        zip_ = zip(kireaji_colors, [i for i in aa[8:15]])
+        zip_ = zip(kireaji_colors, kireaji_values[8:15])
         list_ = ["{}{}".format(c, v*10) for c, v in zip_ if v != 0]
         item["kireaji"] = "".join(list_[-2:])
 
-        zip_ = zip(kireaji_colors, [i for i in aa[0:7]])
+        zip_ = zip(kireaji_colors, kireaji_values[0:7])
         list_ = ["{}{}".format(c, v*10) for c, v in zip_ if v != 0]
         item["kireaji2"] = "".join(list_[-2:])
 
