@@ -71,7 +71,6 @@ for url in urls:
         # name and pyhsical power
         item["wepontype"] = url
         item["name"] = tds[0].span.a.string
-        item["buturi"] = tds[2].string
 
         # wepon level
         pat = r"http://wiki.mhxg.org/images/weapon/w.*-(.*).gif"
@@ -82,6 +81,7 @@ for url in urls:
         if item["wepontype"] in ["raito", "hebi"]:
             item["seinou"] = "".join([x.strip() for x in tds[2].findAll(text=True)])
         else:
+            item["buturi"] = tds[2].string
             item["seinou"] = "".join([x.strip() for x in tds[3].findAll(text=True)])
 
         pat = re.compile(r"""
@@ -101,15 +101,11 @@ for url in urls:
         爆破(?P<exp>\d*)
         )*
         """, re.VERBOSE)
-        m = pat.match(item["seinou"])
-        if m is not None:
-            dict = m.groupdict()
+        mo = pat.match(item["seinou"])
+        dict = mo.groupdict()
+        upd = {k: dict[k] for k in dict if (k not in item)}
+        item.update(upd)
 
-            for k in dict:
-                if dict[k] is None:
-                    item[k] = 0
-                else:
-                    item[k] = dict[k]
         # kireaji
 
         # output
