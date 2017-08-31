@@ -112,8 +112,6 @@ for url in urls:
                     item[k] = dict[k]
         # kireaji
 
-        # print(u" {} {} {} {} {}".format(url, item["name"], item["buturi"], item["level"], item["crit_p"]))
-        for k in keyorder:
-            print("{} ".format(item[k]), end='')
-        print("")
+        # output
+        print(",".join([item[k] or "" for k in keyorder]))
         items.append(item)
