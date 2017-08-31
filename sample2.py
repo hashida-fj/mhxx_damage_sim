@@ -46,7 +46,12 @@ keyorder = [
     "drowsy",
     "poison",
     "exp",
+    "takumi_fuyou",
+    "kireaji",
+    "kireaji2",
 ]
+
+kireaji_colors = ["赤", "橙", "黄", "緑", "青", "白", "紫"]
 
 for url in urls:
     download_urls = []
@@ -107,6 +112,24 @@ for url in urls:
         item.update(upd)
 
         # kireaji
+        if item["wepontype"] in ["taiken", "tati", "katate", "souken", "hanma", "ransu"]:
+            kireaji = tds[4].div
+        elif item["wepontype"] in ["fue", "gansu", "chaaku", "suraaku", "musikon"]:
+            kireaji = tds[5].div
+
+        aa = [len(s.string or "") for s in kireaji.find_all("span")]
+        if aa[7] == 0:
+            item["takumi_fuyou"] = "1"
+        else:
+            item["takumi_fuyou"] = "0"
+
+        zip_ = zip(kireaji_colors, [i for i in aa[8:15]])
+        list_ = ["{}{}".format(c, v*10) for c, v in zip_ if v != 0]
+        item["kireaji"] = "".join(list_[-2:])
+
+        zip_ = zip(kireaji_colors, [i for i in aa[0:7]])
+        list_ = ["{}{}".format(c, v*10) for c, v in zip_ if v != 0]
+        item["kireaji2"] = "".join(list_[-2:])
 
         # output
         print(",".join([item[k] or "" for k in keyorder]))
