@@ -49,10 +49,20 @@ keyorder = [
     "takumi_fuyou",
     "kireaji",
     "kireaji2",
-    "slot"
+    "slot",
+    "biko"
 ]
 
 kireaji_colors = ["赤", "橙", "黄", "緑", "青", "白", "紫"]
+fue_colors = {
+    "#00cc00": "緑",
+    "#00eeee": "空",
+    "#e0002a": "赤",
+    "#eeee00": "黄",
+    "#ef810f": "橙",
+    "#f3f3f3": "白",
+    "#ff00ff": "紫",
+    "blue"   : "青"}
 
 for url in urls:
     download_urls = []
@@ -114,9 +124,11 @@ for url in urls:
 
         # kireaji
         if item["wepontype"] in ["taiken", "tati", "katate", "souken", "hanma", "ransu"]:
+            biko = ""
             kireaji = tds[4].div
             item["slot"] = str(3 - tds[5].string.count("-"))
         elif item["wepontype"] in ["fue", "gansu", "chaaku", "suraaku", "musikon"]:
+            biko = tds[4].string
             kireaji = tds[5].div
             item["slot"] = str(3 - tds[6].string.count("-"))
 
@@ -133,6 +145,14 @@ for url in urls:
         zip_ = zip(kireaji_colors, [i for i in aa[0:7]])
         list_ = ["{}{}".format(c, v*10) for c, v in zip_ if v != 0]
         item["kireaji2"] = "".join(list_[-2:])
+
+        # senritsu
+        colorpat = re.compile(r"color:(.*);")
+        if item["wepontype"] in ["fue"]:
+            cl = [colorpat.match(s["style"]).group(1) for s in tds[4].div.find_all("span")]
+            biko = "".join([fue_colors[c] for c in cl])
+
+        item["biko"] = biko
 
         # output
         print(",".join([item[k] or "" for k in keyorder]))
