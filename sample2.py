@@ -49,6 +49,7 @@ keyorder = [
     "takumi_fuyou",
     "kireaji",
     "kireaji2",
+    "slot"
 ]
 
 kireaji_colors = ["赤", "橙", "黄", "緑", "青", "白", "紫"]
@@ -114,8 +115,10 @@ for url in urls:
         # kireaji
         if item["wepontype"] in ["taiken", "tati", "katate", "souken", "hanma", "ransu"]:
             kireaji = tds[4].div
+            item["slot"] = str(3 - tds[5].string.count("-"))
         elif item["wepontype"] in ["fue", "gansu", "chaaku", "suraaku", "musikon"]:
             kireaji = tds[5].div
+            item["slot"] = str(3 - tds[6].string.count("-"))
 
         aa = [len(s.string or "") for s in kireaji.find_all("span")]
         if aa[7] == 0:
