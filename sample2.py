@@ -56,6 +56,7 @@ fue_colors = {
     "#ff00ff": "紫",
     "blue"   : "青"}
 
+items = []
 for url in urls:
     local_filename = url+".html"
 
@@ -64,7 +65,6 @@ for url in urls:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    items = []
     for x in soup.select("table tbody > tr"):
         tds = x.find_all("td")
 
@@ -140,6 +140,12 @@ for url in urls:
 
         item["biko"] = biko
 
-        # output
-        print(",".join([item[k] or "" for k in keyorder]))
+        # append
         items.append(item)
+
+
+def printAll():
+    for item in items:
+        print(",".join([item[k] or "" for k in keyorder]))
+
+# printAll()
