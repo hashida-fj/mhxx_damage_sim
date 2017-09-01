@@ -148,4 +148,135 @@ def printAll():
     for item in items:
         print(",".join([item[k] or "" for k in keyorder]))
 
+
+def getExpectedValue(item,
+                     b_add=0, c_add=0,
+                     tyou=False, tuukon=False, kyougeki=False):
+    gofu = 5
+    tume = 10
+    crit_p_gain = 1.25 if not tyou else 1.4
+    crit_m_gain = 0.75 if not tuukon else 1.0625
+
+    # indicated value
+    indicated = int(item["buturi"]) + gofu + tume + b_add
+
+    # critical ration
+
+    if kyougeki:
+        c_add += 30
+
+    if "or" in item["name"]:
+        crit_m_hit = int(item["crit_m"] or "0")
+        crit_p_hit = min(int(item["crit_p"] or "0") + c_add,
+                         100 - crit_m_hit)
+        if kyougeki:
+            crit_p_hit += crit_m_hit
+            crit_m_hit = 0
+    else:
+        crit_p_hit = min(int(item["crit_p"] or "0") + c_add,
+                         100)
+        crit_m_hit = int(item["crit_m"] or "0")
+
+    normal_hit = 100 - crit_p_hit - crit_m_hit
+    crit_gain = (normal_hit
+                 + crit_p_hit * crit_p_gain
+                 + crit_m_hit * crit_m_gain) / 100.0
+
+    # print("+ {} * {} / -{} * {}  -- {}".format(crit_p_hit, crit_p_gain, crit_m_hit, crit_m_gain, normal_hit))
+
+    # kireaji
+    if u"紫" in item["kireaji"]:
+        kireaji_gain = 1.39
+    elif u"白"in item["kireaji"]:
+        kireaji_gain = 1.32
+    elif u"青"in item["kireaji"]:
+        kireaji_gain = 1.2
+    elif u"緑"in item["kireaji"]:
+        kireaji_gain = 1.05
+    else:
+        kireaji_gain = 1.0
+
+    # print(kireaji_gain)
+
+    # 期待値
+    return indicated * crit_gain * kireaji_gain
+
+
+def printExpected():
+    for item in items:
+        print("{} {}".format(item["name"],
+                             getExpectedValue(item, 40)))
+
+
+def printNephilium():
+    for item in items:
+        if "or" in item["name"]:
+            print("{} {} {} {} {} {}"
+                  .format(item["name"],
+                          getExpectedValue(item, tyou=True),
+                          getExpectedValue(item, tuukon=True),
+                          getExpectedValue(item, tyou=True, tuukon=True),
+                          getExpectedValue(item, kyougeki=True),
+                          getExpectedValue(item, tyou=True, kyougeki=True)
+                  )
+            )
+
+
+def parseSkills(skills):
+    arg = {
+        "c_add": 0,
+        "b_add": 0,
+        "tyou": False,
+        "tuukon": False,
+        "kyougeki": False,
+    }
+
+    if u"見切り1" in skills:
+        arg["c_add"] = 10
+    if u"見切り2" in skills:
+        arg["c_add"] = 20
+    if u"見切り3" in skills:
+        arg["c_add"] = 30
+
+    if u"連撃" in skills:
+        arg["c_add"] += 30
+    if u"弱特" in skills:
+        arg["c_add"] += 50
+
+    if u"超会心" in skills:
+        arg["tyou"] = True
+    if u"痛恨" in skills:
+        arg["tuukon"] = True
+
+    if u"狂" in skills:
+        arg["kyougeki"] = True
+    if u"挑戦者2" in skills:
+        arg["b_add"] += 20
+        arg["c_add"] += 15
+    elif u"本気2" in skills:
+        arg["c_add"] += 50
+
+    return arg
+
+
+def printVariousSkills():
+    skills = [
+        "見切り1連撃超会心",
+        "見切り2連撃超会心",
+        "挑戦者2超会心",
+        "挑戦者2連撃",
+        "見切り2連撃弱特",
+        "狂超会心",
+    ]
+    print(" ".join(["名前"] + skills))
+
+    args = [parseSkills(s) for s in skills]
+    for item in items:
+        values = [str(getExpectedValue(item, **arg)) for arg in args]
+        print(" ".join([item["name"]] + values))
+
+
 # printAll()
+# printExpected()
+
+printVariousSkills()
