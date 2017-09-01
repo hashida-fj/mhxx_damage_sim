@@ -149,8 +149,82 @@ def printAll():
         print(",".join([item[k] or "" for k in keyorder]))
 
 
+def getExpectedElementalValue(item,
+                              b_add=0, c_add=0,
+                              indv_enhance=0, elem_enhance=0,
+                              elem_critical=False,
+                              tyou=False, tuukon=False, kyougeki=False):
+    # const
+    elements = ["fire", "water", "elec", "ice", "dragon"]
+    indv_gain = [1, 1.05, 1.1]
+    indv_offset = [0, 4, 6]
+    elem_gain = [1, 1.1]
+
+    # zokusei kaisin
+    if item["wepontype"] in ["katate", "souken", "yum"]:
+        crit_p_gain = 1.35
+    elif item["wepontype"] in ["raito", "hebi"]:
+        crit_p_gain = 1.3
+    else:
+        crit_p_gain = 1.25
+
+    crit_m_gain = 1  # really?
+
+    ret = {}
+    for e in elements:
+
+        if item[e] is None:
+            ret[e] = 0
+            continue
+
+        # indicated value
+        indicated = int(item[e]) * min(indv_gain[indv_enhance] * elem_gain[elem_enhance], 1.2) + indv_offset[indv_enhance]
+
+        # critical ratio
+        if kyougeki:
+            c_add += 30
+
+        if "or" in item["name"]:
+            crit_m_hit = int(item["crit_m"] or "0")
+            crit_p_hit = min(int(item["crit_p"] or "0") + c_add,
+                             100 - crit_m_hit)
+            if kyougeki:
+                crit_p_hit += crit_m_hit
+                crit_m_hit = 0
+        else:
+            crit_p_hit = min(int(item["crit_p"] or "0") + c_add,
+                             100)
+            crit_m_hit = int(item["crit_m"] or "0")
+
+        normal_hit = 100 - crit_p_hit - crit_m_hit
+        crit_gain = (normal_hit
+                     + crit_p_hit * crit_p_gain
+                     + crit_m_hit * crit_m_gain) / 100.0
+
+        # kireaji
+        if u"紫" in item["kireaji"]:
+            kireaji_gain = 1.2
+        elif u"白"in item["kireaji"]:
+            kireaji_gain = 1.125
+        elif u"青"in item["kireaji"]:
+            kireaji_gain = 1.1  # ?
+        elif u"緑"in item["kireaji"]:
+            kireaji_gain = 1.0  # ?
+        else:
+            kireaji_gain = 1.0
+
+        # print(kireaji_gain)
+
+        # 期待値
+        ret[e] = indicated * crit_gain * kireaji_gain
+
+    return ret
+
+
 def getExpectedValue(item,
                      b_add=0, c_add=0,
+                     indv_enhance=0, elem_enhance=0,
+                     elem_critical=False,
                      tyou=False, tuukon=False, kyougeki=False):
     gofu = 5
     tume = 10
@@ -160,8 +234,7 @@ def getExpectedValue(item,
     # indicated value
     indicated = int(item["buturi"]) + gofu + tume + b_add
 
-    # critical ration
-
+    # critical ratio
     if kyougeki:
         c_add += 30
 
@@ -229,6 +302,9 @@ def parseSkills(skills):
         "tyou": False,
         "tuukon": False,
         "kyougeki": False,
+        "indv_enhance": 0,
+        "elem_enhance": 0,
+        "elem_critical": False
     }
 
     if u"見切り1" in skills:
@@ -256,6 +332,22 @@ def parseSkills(skills):
     elif u"本気2" in skills:
         arg["c_add"] += 50
 
+    # zokusei
+    if u"W属性2" in skills:
+        arg["indv_enhance"] = 2
+        arg["elem_enhance"] = 1
+    if u"W属性1" in skills:
+        arg["indv_enhance"] = 1
+        arg["elem_enhance"] = 1
+    if u"単属性2" in skills:
+        arg["indv_enhance"] = 2
+    if u"単属性1" in skills:
+        arg["indv_enhance"] = 1
+    if u"属強" in skills:
+        arg["elem_enhance"] = 1
+    if u"属性会心" in skills:
+        arg["elem_critical"] = True
+
     return arg
 
 
@@ -276,7 +368,22 @@ def printVariousSkills():
         print(" ".join([item["name"]] + values))
 
 
+def printVariousElemSkills():
+    skills = [
+        "W属性2",
+        "属強,属性会心,連撃",
+        "単属性2,属性会心,連撃"
+    ]
+    print(" ".join(["名前"] + skills))
+
+    args = [parseSkills(s) for s in skills]
+    for item in items:
+        values = [str(getExpectedElementalValue(item, **arg)["fire"]) for arg in args]
+        print(" ".join([item["name"]] + values))
+
 # printAll()
 # printExpected()
 
+
 printVariousSkills()
+printVariousElemSkills()
